@@ -1,78 +1,38 @@
-package vlcj;
+package button;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
+import javax.swing.JSlider;
 
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
-public class Demo2  extends JFrame {
-		
-		private JButton start,stop ;
-		private EmbeddedMediaPlayerComponent mediaPlayerComponent;
-		
-		public Demo2() {
-			
-			setLayout(new BorderLayout());	
-			start = new JButton("Start");
-			stop = new JButton("Stop");
-			JPanel top = new JPanel(new FlowLayout());
-			top.setLayout(null);
-			top.add(start); top.add(stop);
-			
-			
-			
-		 
-							 			
-								
-		EmbeddedMediaPlayerComponent component = new EmbeddedMediaPlayerComponent();
-				
-		JFrame f =new JFrame();		
-		f.setBounds(0,0,720,480);//設定視窗大小
-		f.setTitle("MediaPlayer");	
-		f.add(top,BorderLayout.SOUTH);
-		f.setContentPane(component);
+public class SliderProcess extends Thread{
+		private JSlider slider;
 		
 		
-		//f.add(stop,BorderLayout.SOUTH);
 		
-		f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法	
-	
+		
+		public SliderProcess(JSlider slider) {
 			
 			
-		public void windowClosing(WindowEvent e) {
-			component.release();//清除占存這樣中途關視窗就不會繼續播影片
-			System.exit(0);//關掉視窗會直接關掉程式
-			
+			this.slider=slider;
 			
 		}
 		
-	});
-		f.setVisible(true);
+		int i = 0;
 		
-		component.mediaPlayer().media().play("C:\\vlcj\\Naruto.mp4");		
-}
-
-
-public static void main(String[] args) {
-	new Demo2();
-}
+		public void run () {
+			while(i<slider.getMaximum()) {
+			i++;
+			slider.setValue(i);
+			
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		}
+		}
+		
 }
