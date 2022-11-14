@@ -1,72 +1,74 @@
 package vlcj;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.sql.Time;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.DuplicateFormatFlagsException;
-
-import javax.sound.midi.Soundbank;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.plaf.multi.MultiButtonUI;
-
 import button.SliderProcess;
-import button.mouse;
-import uk.co.caprica.vlcj.*;
-import uk.co.caprica.vlcj.binding.internal.libvlc_audio_set_volume_cb;
-import uk.co.caprica.vlcj.binding.internal.media_duration_changed;
-import uk.co.caprica.vlcj.binding.internal.media_player_seekable_changed;
-import uk.co.caprica.vlcj.media.callback.seekable.SeekableCallbackMedia;
-import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.FullScreenApi;
+import uk.co.caprica.vlcj.player.embedded.fullscreen.FullScreenStrategy;
+import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.player.list.MediaListPlayer;
+
 
 
 public class Demo  extends JFrame {
 		private JSlider slider = new JSlider();		
 		private JButton start,stop,skip,rewind;
-		private final EmbeddedMediaPlayerComponent component = new EmbeddedMediaPlayerComponent();
-		private static final int Progress_min_VALUE= 0;	
-		private static final int Progress_max_VALUE= 100;	
+		private JFrame f = new JFrame();
+		private JPanel pane = new JPanel();
+		private final EmbeddedMediaPlayerComponent component ;
 		
 		int len;
 		
 				
 		public Demo() {
+			component = new EmbeddedMediaPlayerComponent() {
+				 public void mouseClicked(MouseEvent e) {
+					 mediaPlayer().fullScreen().set(true);
+					 pane.setVisible(false);				 	
+				 }
+				 public void keyPressed(KeyEvent e) {
+					 if(mediaPlayer().fullScreen().isFullScreen()) {		
+					
+					 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						 mediaPlayer().fullScreen().set(false);
+						 pane.setVisible(true);
+					 }
+				    }
+				 }
+			};
 			
+			
+			
+			
+			
+//			if(mediaPlayer().fullScreen().isFullScreen());
+//			 
+//			 mediaPlayer().fullScreen().set(false);
+//			 pane.setVisible(true);
 			
 			Border videoBorder = BorderFactory.createTitledBorder("Video Controls");
 			Border audioBorder = BorderFactory.createTitledBorder("Audio Controls");
-			
 			start = new JButton("Start");
 			stop  = new JButton("Stop");	
 			skip  = new JButton("skip");	
 			rewind = new JButton("rewind");	
-			slider.setPreferredSize(new Dimension(500, 25));			
+			slider.setPreferredSize(new Dimension(300, 25));			
 			slider.setValue(0);
-			slider.setMinimum(Progress_min_VALUE);
-			slider.setMaximum(Progress_max_VALUE);
+			
 			
 			        		
 			JPanel under = new JPanel();
@@ -76,19 +78,36 @@ public class Demo  extends JFrame {
 			JPanel top = new JPanel();
 			top.setBorder(audioBorder);
 			top.add(slider);
-			JPanel pane = new JPanel();
+			pane = new JPanel();
 			pane.add(under);
 			pane.add(top);
 			
 		
-			JFrame f =new JFrame();		
-			f.setBounds(100,100,1280,960);//設定視窗大小
+			f =new JFrame();
+			//f.pack();
+			f.setBounds(100,100,800,400);//設定視窗大小
 			f.setTitle("MediaPlayer");						
 			f.add(component,BorderLayout.CENTER);//設定F為component
-			f.add(pane,BorderLayout.SOUTH);	
+			f.add(pane,BorderLayout.SOUTH);
 			
-			f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法	
-									
+		
+			component.mediaPlayer().fullScreen().strategy( new AdaptiveFullScreenStrategy(f));
+			component.mediaPlayer().input().enableMouseInputHandling(false);
+			component.mediaPlayer().input().enableKeyInputHandling(false);
+			
+			component.addMouseListener(new MouseAdapter() {
+			@Override
+			    public void mouseClicked(MouseEvent e) {
+			    	 System.out.println("Mouse Clicked. (" + e.getX() + "," + e.getY() + ")");
+			    	
+			    }
+			});
+				
+			f.setVisible(true);
+					
+			component.mediaPlayer().media().play("C:\\vlcj\\Naruto.mp4");	
+		
+			f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法								
 			public void windowClosing(WindowEvent e) {
 			component.release();//清除占存這樣中途關視窗就不會繼續播影片
 			System.exit(0);//關掉視窗會直接關掉程式
@@ -96,6 +115,7 @@ public class Demo  extends JFrame {
 		}
 				
 	});
+		
 			
 			
 		start.addActionListener(new ActionListener() {		
@@ -105,7 +125,9 @@ public class Demo  extends JFrame {
 			});
 		stop.addActionListener(new ActionListener() {
 	         public void actionPerformed(ActionEvent e) {
+	        	
 	        	 component.mediaPlayer().controls().pause();
+	        	
 	         }
 	      });
 		skip.addActionListener(new ActionListener() {
@@ -120,25 +142,16 @@ public class Demo  extends JFrame {
 	      });
 		slider.addMouseListener(new MouseAdapter() {
 		  
-		  
 			public void mouseClicked(MouseEvent e) {
 		    	int x = e.getX();
 		    	long total = component.mediaPlayer().status().length();
 		    	long time = (long)((float)x/slider.getWidth()*total);
+		 
 		    	
-		    	component.mediaPlayer().controls().setTime(time);
-		    	    
-	    	
+		    	component.mediaPlayer().controls().setTime(time);       	
 		    }
 		});
-		
-	
-		
-		
-		f.setVisible(true);
-			component.mediaPlayer().media().play("D:\\anime.mp4");
-						
-	
+			
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -150,10 +163,7 @@ public class Demo  extends JFrame {
 			SliderProcess sp = new SliderProcess(slider) ;		
 			sp.start();
 			}
-
-
-
-			
+	
 public static void main(String[] args)   {
 	new Demo();
 	
