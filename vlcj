@@ -4,169 +4,161 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.Timer;
 import javax.swing.border.Border;
-import button.SliderProcess;
-import uk.co.caprica.vlcj.player.embedded.FullScreenApi;
-import uk.co.caprica.vlcj.player.embedded.fullscreen.FullScreenStrategy;
 import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
 
 
-public class Demo  extends JFrame {
+public class Demo2  extends JFrame {
+		
 		private JSlider slider = new JSlider();		
 		private JButton start,stop,skip,rewind;
 		private JFrame f = new JFrame();
 		private JPanel pane = new JPanel();
-		private final EmbeddedMediaPlayerComponent component ;
-		
+		private final EmbeddedMediaPlayerComponent component ;		
+		private static final int Progress_max_VALUE= 100;		
 		int len;
 		
 				
-		public Demo() {
-			component = new EmbeddedMediaPlayerComponent() {
-				 public void mouseClicked(MouseEvent e) {
-					 mediaPlayer().fullScreen().set(true);
-					 pane.setVisible(false);				 	
+		public Demo2() {
+			
+			
+			  component = new EmbeddedMediaPlayerComponent() {
+	
+				 	public void mouseClicked(MouseEvent e) {
+					mediaPlayer().fullScreen().set(true);
+					pane.setVisible(false);				 	
 				 }
-				 public void keyPressed(KeyEvent e) {
-					 if(mediaPlayer().fullScreen().isFullScreen()) {		
+				 	public void keyPressed(KeyEvent e) {
+				 	if(mediaPlayer().fullScreen().isFullScreen()) {		
 					
-					 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-						 mediaPlayer().fullScreen().set(false);
-						 pane.setVisible(true);
-					 }
-				    }
-				 }
-			};
+				 	if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				 	mediaPlayer().fullScreen().set(false);
+				 	pane.setVisible(true);
+				 			}
+				 		}
+				 	}
+			  };
+				start = new JButton("Start");
+				stop  = new JButton("Stop");	
+				skip  = new JButton("skip");	
+				rewind = new JButton("rewind");	
+				slider.setPreferredSize(new Dimension(300, 25));			
+				slider.setValue(0);
+				slider.setMaximum(Progress_max_VALUE);
+				Border videoBorder = BorderFactory.createTitledBorder("Video Controls");
+				Border videoVideoSliderControlsControls = BorderFactory.createTitledBorder("Video Slider Controls ");
 			
-			
-			
-			
-			
-//			if(mediaPlayer().fullScreen().isFullScreen());
-//			 
-//			 mediaPlayer().fullScreen().set(false);
-//			 pane.setVisible(true);
-			
-			Border videoBorder = BorderFactory.createTitledBorder("Video Controls");
-			Border audioBorder = BorderFactory.createTitledBorder("Audio Controls");
-			start = new JButton("Start");
-			stop  = new JButton("Stop");	
-			skip  = new JButton("skip");	
-			rewind = new JButton("rewind");	
-			slider.setPreferredSize(new Dimension(300, 25));			
-			slider.setValue(0);
-			
-			
-			        		
-			JPanel under = new JPanel();
-			under.setBorder(videoBorder);
-			under.add(start);under.add(stop);
-			under.add(skip);under.add(rewind);
-			JPanel top = new JPanel();
-			top.setBorder(audioBorder);
-			top.add(slider);
-			pane = new JPanel();
-			pane.add(under);
-			pane.add(top);
-			
-		
-			f =new JFrame();
-			//f.pack();
-			f.setBounds(100,100,800,400);//設定視窗大小
-			f.setTitle("MediaPlayer");						
-			f.add(component,BorderLayout.CENTER);//設定F為component
-			f.add(pane,BorderLayout.SOUTH);
-			
-		
-			component.mediaPlayer().fullScreen().strategy( new AdaptiveFullScreenStrategy(f));
-			component.mediaPlayer().input().enableMouseInputHandling(false);
-			component.mediaPlayer().input().enableKeyInputHandling(false);
-			
-			component.addMouseListener(new MouseAdapter() {
-			@Override
-			    public void mouseClicked(MouseEvent e) {
-			    	 System.out.println("Mouse Clicked. (" + e.getX() + "," + e.getY() + ")");
-			    	
-			    }
-			});
-				
-			f.setVisible(true);
-					
-			component.mediaPlayer().media().play("C:\\vlcj\\Naruto.mp4");	
-		
-			f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法								
-			public void windowClosing(WindowEvent e) {
-			component.release();//清除占存這樣中途關視窗就不會繼續播影片
-			System.exit(0);//關掉視窗會直接關掉程式
-						
-		}
-				
-	});
-		
-			
-			
-		start.addActionListener(new ActionListener() {		
+				start.addActionListener(new ActionListener() {		
 				public void actionPerformed(ActionEvent e) {
-					 component.mediaPlayer().controls().play();
+				component.mediaPlayer().controls().play();
 				}
-			});
-		stop.addActionListener(new ActionListener() {
-	         public void actionPerformed(ActionEvent e) {
-	        	
-	        	 component.mediaPlayer().controls().pause();
-	        	
-	         }
-	      });
-		skip.addActionListener(new ActionListener() {
-	         public void actionPerformed(ActionEvent e) {
-	        	 component.mediaPlayer().controls().skipTime(10000);
-	         }
-	      });
-		rewind.addActionListener(new ActionListener() {
-	         public void actionPerformed(ActionEvent e) {
-	        	 component.mediaPlayer().controls().skipTime(-10000);
-	         }
-	      });
-		slider.addMouseListener(new MouseAdapter() {
-		  
-			public void mouseClicked(MouseEvent e) {
-		    	int x = e.getX();
-		    	long total = component.mediaPlayer().status().length();
-		    	long time = (long)((float)x/slider.getWidth()*total);
-		 
-		    	
-		    	component.mediaPlayer().controls().setTime(time);       	
-		    }
-		});
+				});
+				stop.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+	        	component.mediaPlayer().controls().pause();	        		        	
+				}
+				});
+				skip.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+				component.mediaPlayer().controls().skipTime(10000);//1秒 =1000 毫秒 
+				}
+				});
+				rewind.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+				component.mediaPlayer().controls().skipTime(-10000);
+				}
+				});		
+			//--------------------------------------------------------						        		
+				JPanel vc = new JPanel();
+				vc.setBorder(videoBorder);
+				vc.add(start);vc.add(stop);
+				vc.add(skip);vc.add(rewind);			
 			
-			try {
-				Thread.sleep(1000);
-			} catch (Exception e) {
-				System.out.println(e);
-			}
-			 this.len = (int)(component.mediaPlayer().status().length()/1000);
-			System.out.println(len);
-			slider.setMaximum(len);
-			SliderProcess sp = new SliderProcess(slider) ;		
-			sp.start();
-			}
-	
-public static void main(String[] args)   {
-	new Demo();
-	
-}
+				JPanel vsc = new JPanel();
+				vsc.setBorder(videoVideoSliderControlsControls);
+				vsc.add(slider);
+				pane = new JPanel();
+				pane.add(vc);
+				pane.add(vsc);
+				
+				f =new JFrame();
+				f.setBounds(100,100,800,400);//設定視窗大小
+				f.setTitle("MediaPlayer");						
+				f.add(component,BorderLayout.CENTER);//設定F為component
+				f.add(pane,BorderLayout.SOUTH);
+				f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法								
+				public void windowClosing(WindowEvent e) {
+				component.release();//清除占存這樣中途關視窗就不會繼續播影片
+				System.exit(0);//關掉視窗會直接關掉程式
+				}			
+				});
+				component.mediaPlayer().fullScreen().strategy( new AdaptiveFullScreenStrategy(f));
+				component.mediaPlayer().input().enableMouseInputHandling(false);
+				component.mediaPlayer().input().enableKeyInputHandling(false);	
+				f.setVisible(true);					
+			
+				component.mediaPlayer().media().play("D:\\anime.mp4");
+				Timer ProgressTimer = getProgressTimer();
+				ProgressTimer.start();
+				
+				
+				
+				
+				slider.addMouseListener(new MouseAdapter() {		  
+					public void mouseClicked(MouseEvent e) {
+						int x = e.getX();
+						long total = component.mediaPlayer().status().length();
+						long time = (long)((float)x/slider.getWidth()*total);		    	
+						component.mediaPlayer().controls().setTime(time);  
+						}
+					});	
+				}	
 		
-}
+		
+		
+				private Timer getProgressTimer() {
+					return new Timer(1000,new AbstractAction() {
+						public void actionPerformed(ActionEvent e) {				
+						if(slider.getValue()>=Progress_max_VALUE) {
+						 component.mediaPlayer().controls().start();
+						 slider.setValue(0);
+						
+						}
+						long total =component.mediaPlayer().status().length();
+						
+						long curr = component.mediaPlayer().status().time();
+						
+						setProgress(curr,total);
+						}
+				});
+				}
+				
+				private void setProgress(long curr,long total) {
+				
+					float percent = (float) curr/total;//curr/total都是浮點數求出來的商也是
+						int value =(int)(percent*100);//進度條以秒計算，所以要*100，讓他變整數。		
+						slider.setValue(value);
+				}
+				
+			
+			
+				public static void main(String[] args)   {
+					new Demo2();
+	
+					}
+		
+				}
