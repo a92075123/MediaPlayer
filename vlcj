@@ -9,8 +9,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileDescriptor;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -23,7 +21,11 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import uk.co.caprica.vlcj.player.embedded.fullscreen.adaptive.AdaptiveFullScreenStrategy;
+import uk.co.caprica.vlcj.player.base.AudioChannel;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
 
@@ -35,7 +37,7 @@ public class Demo  extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 		private JSlider slider = new JSlider();	
-//		private JSlider slider2 = new JSlider();
+		private JSlider slider2 = new JSlider();
 		private JButton start,pause,skip,rewind;
 		private JMenuBar mb;
 		private JMenu fileMenu;
@@ -45,6 +47,7 @@ public class Demo  extends JFrame {
 		private final EmbeddedMediaPlayerComponent component ;		
 		private static final int Progress_max_VALUE= 100;		
 		int len;
+		
 		protected String filePath;
 		
 				
@@ -55,8 +58,11 @@ public class Demo  extends JFrame {
 			 
 			
 				public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2) {
 				mediaPlayer().fullScreen().set(true);
-				pane.setVisible(false);				 	
+				pane.setVisible(false);	
+				mb.setVisible(false);
+				}
 				}
 				public void keyPressed(KeyEvent e) {
 				if(mediaPlayer().fullScreen().isFullScreen()) {		
@@ -64,6 +70,7 @@ public class Demo  extends JFrame {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 				mediaPlayer().fullScreen().set(false);
 				pane.setVisible(true);
+				mb.setVisible(true);
 				 			}
 				 		}
 				 	}
@@ -102,17 +109,19 @@ public class Demo  extends JFrame {
 				openMenuItem = new JMenuItem("開啟檔案");			
 				fileMenu.add(openMenuItem);	
 				mb.add(fileMenu);
-				setJMenuBar(mb);
+				
 							
 				slider.setPreferredSize(new Dimension(300, 25));			
 				slider.setValue(0);
 				slider.setMaximum(Progress_max_VALUE);
-//				slider2.setOrientation(1);
-//				slider2.setMaximum(Progress_max_VALUE);
-//				slider2.setPreferredSize(new Dimension(65, 75));
+				slider2.setOrientation(1);			
+				slider2.setValue(50);
+				slider2.setMinimum(0);
+				slider2.setMaximum(Progress_max_VALUE);
+				slider2.setPreferredSize(new Dimension(65, 75));
 				Border videoBorder = BorderFactory.createTitledBorder("Video Controls");
 				Border videoVideoSliderControlsControls = BorderFactory.createTitledBorder("Video Slider");
-//				Border videomusicSliderControlsControls = BorderFactory.createTitledBorder("Audio Slider");
+				Border videomusicSliderControlsControls = BorderFactory.createTitledBorder("Audio Slider");
 				 //-----------------------------------------------
 				
 				start.addActionListener(new ActionListener() {		
@@ -142,14 +151,14 @@ public class Demo  extends JFrame {
 				JPanel vc = new JPanel();
 				vc.setBorder(videoBorder);
 				vc.add(start);vc.add(pause);
-				vc.add(skip);vc.add(rewind);			
+				vc.add(rewind);vc.add(skip);			
 			
 				JPanel vsc = new JPanel();
 				vsc.setBorder(videoVideoSliderControlsControls);
 				vsc.add(slider);
 				JPanel vmsc = new JPanel();
-//				vmsc.setBorder(videomusicSliderControlsControls);
-//				vmsc.add(slider2);
+				vmsc.setBorder(videomusicSliderControlsControls);
+				vmsc.add(slider2);
 				pane = new JPanel();
 				pane.add(vc);
 				pane.add(vsc);
@@ -163,18 +172,17 @@ public class Demo  extends JFrame {
 				f.add(component,BorderLayout.CENTER);//設定F為component
 				f.add(pane,BorderLayout.SOUTH);
 				f.add(mb,BorderLayout.NORTH);
+				
 				openMenuItem.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {
-					FileDialog fd =new FileDialog(f,"開啟檔案",FileDialog.LOAD);
-					fd.setDirectory("C:\\");
-					fd.setFile("*.mp4");
-					fd.setVisible(true);		
-					String filename = fd.getFile();
-					System.out.println(filename);
-					component.mediaPlayer().media().play(filename);					
-					}
-					}
-				);
+						FileDialog fd =new FileDialog(f,"開啟檔案",FileDialog.LOAD);
+						fd.setVisible(true);
+						filePath = fd.getDirectory()+fd.getFile();
+						System.out.println(filePath);
+						component.mediaPlayer().media().play(filePath);					
+						}
+						});
+			
 				f.addWindowListener(new WindowAdapter(){//WindowListener視窗發出訊號的方法，WindowAdapter視窗接收訊號的方法								
 				public void windowClosing(WindowEvent e) {
 				component.release();//清除占存這樣中途關視窗就不會繼續播影片
@@ -183,32 +191,31 @@ public class Demo  extends JFrame {
 				});
 				component.mediaPlayer().fullScreen().strategy( new AdaptiveFullScreenStrategy(f));	
 				f.setVisible(true);					
-			
-				component.mediaPlayer().media().start("C:\\vlcj\\Naruto.mp4");
+						
+				
 				Timer ProgressTimer = getProgressTimer();
+				
+				
 				ProgressTimer.start();
 				}
-						
+					
+				
 				private Timer getProgressTimer() {
 				return new Timer(1000,new AbstractAction() {
-				
-				/**
-					 * 
-					 */
-				private static final long serialVersionUID = 1L;
-
 				public void actionPerformed(ActionEvent e) {
+				if(component.mediaPlayer().status().length()>0) {
 				setProgress();
 				if(slider.getValue()>=Progress_max_VALUE) {			
-				component.mediaPlayer().controls().start();
-				slider.setValue(0);		
+				
+				slider.setValue(0);	
+				}
 				}		
 				}
 				});
 				}
 				
 				private void setProgress() {
-				
+				 
 				long total =component.mediaPlayer().status().length();
 				//System.out.println(total);
 				long curr = component.mediaPlayer().status().time();
@@ -225,37 +232,31 @@ public class Demo  extends JFrame {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-							
-					
-				
-				
-
+				 
+				 
 				slider.addMouseListener(new MouseAdapter() {		  
-				public void mouseClicked(MouseEvent e) {
+				public void mouseReleased(MouseEvent e) {
 				int x = e.getX();
 				long total = component.mediaPlayer().status().length();
 				long time = (long)((float)x/slider.getWidth()*total);		    	
-				component.mediaPlayer().controls().setTime(time);  
+				component.mediaPlayer().controls().setTime(time); 
+				
+				
 				}
 				});	
 				
-				//slider2.addMouseListener(new MouseAdapter() {		  
-					//public void mouseClicked(MouseEvent e) {
-					
-						
-						
-					//}
-				//});
+				slider2.addMouseListener(new MouseAdapter() {		  									
+				public void mouseReleased (MouseEvent e) {	
+				component.mediaPlayer().audio().setVolume(slider2.getValue());						
+				}
+				});
+										
+				
+
 				
 			
-				
-				
-				
-				
-				
-}
-
-
+				}
+			
 public static void main(String[] args)   {
 	new Demo();
 	
