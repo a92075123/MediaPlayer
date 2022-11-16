@@ -167,7 +167,7 @@ public class Demo  extends JFrame {
 				
 				
 				f =new JFrame();
-				f.setBounds(100,100,800,400);
+				f.setBounds(100,100,800,600);
 				f.setTitle("MediaPlayer");						
 				f.add(component,BorderLayout.CENTER);//設定F為component
 				f.add(pane,BorderLayout.SOUTH);
@@ -215,18 +215,20 @@ public class Demo  extends JFrame {
 				}
 				
 				private void setProgress() {
-				 
+					try {
 				long total =component.mediaPlayer().status().length();
 				//System.out.println(total);
 				long curr = component.mediaPlayer().status().time();
 				//System.out.println(curr);
 				float percent = (float) curr/total;//
+				System.out.println(percent);
+				//percent=(float)(Math.round(percent*100.0)/100.0);
 				//因為求出來的商是浮點數,所以要加float,不然數值出不來無法計算
-				//System.out.println(percent);
+				System.out.println(percent);
 				int value =(int)(percent*100);//進度條以秒計算，所以要*100，讓他變整數。		
-				//System.out.println(value);
+				System.out.println(value);
 				slider.setValue(value);//要帶入int
-				try {
+				
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
