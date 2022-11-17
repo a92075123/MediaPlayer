@@ -111,7 +111,7 @@ public class Demo  extends JFrame {
 				mb.add(fileMenu);
 				
 							
-				slider.setPreferredSize(new Dimension(300, 25));			
+				slider.setPreferredSize(new Dimension(300, 50));			
 				slider.setValue(0);
 				slider.setMaximum(Progress_max_VALUE);
 				slider2.setOrientation(1);			
@@ -126,7 +126,7 @@ public class Demo  extends JFrame {
 				
 				start.addActionListener(new ActionListener() {		
 				public void actionPerformed(ActionEvent e) {
-				component.mediaPlayer().controls().play();
+				component.mediaPlayer().controls().start();
 				}
 				});
 				pause.addActionListener(new ActionListener() {
@@ -179,7 +179,7 @@ public class Demo  extends JFrame {
 						fd.setVisible(true);
 						filePath = fd.getDirectory()+fd.getFile();
 						System.out.println(filePath);
-						component.mediaPlayer().media().play(filePath);					
+						component.mediaPlayer().media().start(filePath);					
 						}
 						});
 			
@@ -201,46 +201,40 @@ public class Demo  extends JFrame {
 					
 				
 				private Timer getProgressTimer() {
-				return new Timer(1000,new AbstractAction() {
+				 return new Timer(1000,new AbstractAction()				        
+				 {
 				public void actionPerformed(ActionEvent e) {
-				if(component.mediaPlayer().status().length()>0) {
-				setProgress();
-				if(slider.getValue()>=Progress_max_VALUE) {			
-				
-				slider.setValue(0);	
-				}
-				}		
-				}
+				if(component.mediaPlayer().status().length()>0) {				
+					setProgress();				
+				}				
+				}					
 				});
 				}
 				
-				private void setProgress() {
-					try {
+				private void setProgress()  {
+				
 				long total =component.mediaPlayer().status().length();
-				//System.out.println(total);
+				System.out.println(total);
 				long curr = component.mediaPlayer().status().time();
-				//System.out.println(curr);
+				System.out.println(curr);
+				while(curr!=total) {	
 				float percent = (float) curr/total;//
 				System.out.println(percent);
-				//percent=(float)(Math.round(percent*100.0)/100.0);
-				//因為求出來的商是浮點數,所以要加float,不然數值出不來無法計算
-				System.out.println(percent);
-				int value =(int)(percent*100);//進度條以秒計算，所以要*100，讓他變整數。		
+				int value =(int)(percent*100);		
 				System.out.println(value);
-				slider.setValue(value);//要帶入int
-				
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				slider.setValue(value);
+				break;
 				}
+				
+			
 				 
 				 
 				slider.addMouseListener(new MouseAdapter() {		  
 				public void mouseReleased(MouseEvent e) {
 				int x = e.getX();
+				//System.out.println(x);
 				long total = component.mediaPlayer().status().length();
-				long time = (long)((float)x/slider.getWidth()*total);		    	
+				long time = (long)((float)x/slider.getWidth()*total);		
 				component.mediaPlayer().controls().setTime(time); 
 				
 				
@@ -252,12 +246,12 @@ public class Demo  extends JFrame {
 				component.mediaPlayer().audio().setVolume(slider2.getValue());						
 				}
 				});
-										
+			}					
 				
 
 				
 			
-				}
+				
 			
 public static void main(String[] args)   {
 	new Demo();
